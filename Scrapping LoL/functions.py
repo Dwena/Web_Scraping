@@ -1,6 +1,7 @@
 from selenium.webdriver import Edge
 from selenium.webdriver.common.by import By
 import sqlite3
+import time
 
 def scraping_lol(url='https://www.leagueoflegends.com/fr-fr/champions/'):
     driver = Edge()
@@ -11,24 +12,33 @@ def scraping_lol(url='https://www.leagueoflegends.com/fr-fr/champions/'):
     champions_names = [element.text for element in champions_elements]
     
     # Connexion à la base de données SQLite
-    conn = sqlite3.connect('champions.db')
-    c = conn.cursor()
+    return champions_names
 
-    c.execute('''
-          CREATE TABLE IF NOT EXISTS champions
-          ([name] TEXT PRIMARY KEY)
-          ''')
+def scraping_champions_info(champion_name ,base_url="https://www.leagueoflegends.com/fr-fr/champions/"):
+    if champion_name.find(' ') != -1:
+        champion_name = champion_name.replace(' ', '-')
+    url = base_url + champion_name.lower()
+    driver = Edge()
+    driver.get(url)
+    time.sleep(2)
 
-    # Insérer les noms des champions dans la base de données
-    for name in champions_names:
-        c.execute("INSERT OR IGNORE INTO champions (name) VALUES (?)", (name,))
+    driver.find_element(By.CSS_SELECTOR, ".osano-cm-accept-all.osano-cm-buttons__button.osano-cm-button.osano-cm-button--type_accept").click()
 
-    # Commit et fermeture de la connexion à la base de données
-    conn.commit()
+    image_element = driver.find_element(By.CSS_SELECTOR, 'img.style__Img-sc-g183su-1')
+    image_url = image_element.get_attribute('src')
 
-    driver.quit()
-    conn.close()
+    try:driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9 p button').click()
+    except:pass
 
+    try:driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9.jheTpK p button').click()
+    except:pass
+    description_element = driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9 p')
+    description_text = description_element.text
+
+    return {
+        "image_url": image_url,
+        "description_text": description_text
+    }
 
 
 
