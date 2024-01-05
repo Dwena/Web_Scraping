@@ -1,6 +1,5 @@
 from selenium.webdriver import Edge
 from selenium.webdriver.common.by import By
-import sqlite3
 import time
 
 def scraping_lol(url='https://www.leagueoflegends.com/fr-fr/champions/'):
@@ -24,22 +23,37 @@ def scraping_champions_info(champion_name ,base_url="https://www.leagueoflegends
 
     driver.find_element(By.CSS_SELECTOR, ".osano-cm-accept-all.osano-cm-buttons__button.osano-cm-button.osano-cm-button--type_accept").click()
 
-    image_element = driver.find_element(By.CSS_SELECTOR, 'img.style__Img-sc-g183su-1')
-    image_url = image_element.get_attribute('src')
+    image_url = driver.find_element(By.CSS_SELECTOR, 'img.style__Img-sc-g183su-1').get_attribute('src')
 
     try:driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9 p button').click()
     except:pass
 
     try:driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9.jheTpK p button').click()
     except:pass
-    description_element = driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9 p')
-    description_text = description_element.text
+    description_text = driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9 p').text
+    summary = driver.find_element(By.CSS_SELECTOR, "[data-testid='overview:subtitle']").text
+
+    # Localisez l'élément de la liste
+    list_item = driver.find_element(By.CSS_SELECTOR, 'li.style__SpecsItem-sc-8gkpub-12')
+
+    # Localiser et extraire l'icône SVG
+    svg_element = list_item.find_element(By.CSS_SELECTOR, 'svg')
+    # Vous pourriez vouloir extraire le contenu SVG ou ses attributs selon votre besoin
+
+    # Localiser et extraire le texte du type de rôle
+    role_type_element = list_item.find_element(By.CSS_SELECTOR, "div[data-testid='overview:rolestring']")
+    role_text = role_type_element.text
+
+    # Localiser et extraire le texte de la valeur du rôle
+    role_value_element = list_item.find_element(By.CSS_SELECTOR, "div[data-testid='overview:role']")
+    role_value_text = role_value_element.text
 
     return {
         "image_url": image_url,
-        "description_text": description_text
+        "description_text": description_text,
+        "summary": summary,
+        "role": role_text,
+        "role_value": role_value_text,
+        "svg": svg_element.get_attribute('innerHTML')
     }
-
-
-
 
