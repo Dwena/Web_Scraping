@@ -1,6 +1,8 @@
 from selenium.webdriver import Edge
 from selenium.webdriver.common.by import By
 import time
+import csv
+from io import StringIO
 
 def scraping_lol(url='https://www.leagueoflegends.com/fr-fr/champions/'):
     driver = Edge()
@@ -33,18 +35,11 @@ def scraping_champions_info(champion_name ,base_url="https://www.leagueoflegends
     description_text = driver.find_element(By.CSS_SELECTOR, 'div.style__Desc-sc-8gkpub-9 p').text
     summary = driver.find_element(By.CSS_SELECTOR, "[data-testid='overview:subtitle']").text
 
-    # Localisez l'élément de la liste
     list_item = driver.find_element(By.CSS_SELECTOR, 'li.style__SpecsItem-sc-8gkpub-12')
 
-    # Localiser et extraire l'icône SVG
-    svg_element = list_item.find_element(By.CSS_SELECTOR, 'svg')
-    # Vous pourriez vouloir extraire le contenu SVG ou ses attributs selon votre besoin
-
-    # Localiser et extraire le texte du type de rôle
     role_type_element = list_item.find_element(By.CSS_SELECTOR, "div[data-testid='overview:rolestring']")
     role_text = role_type_element.text
 
-    # Localiser et extraire le texte de la valeur du rôle
     role_value_element = list_item.find_element(By.CSS_SELECTOR, "div[data-testid='overview:role']")
     role_value_text = role_value_element.text
 
@@ -54,6 +49,16 @@ def scraping_champions_info(champion_name ,base_url="https://www.leagueoflegends
         "summary": summary,
         "role": role_text,
         "role_value": role_value_text,
-        "svg": svg_element.get_attribute('innerHTML')
     }
 
+def convert_df_to_csv(results):
+    output = StringIO()
+    writer = csv.writer(output)
+
+    header = results[0].keys()
+    writer.writerow(header)
+
+    for row in results:
+        writer.writerow(row.values())
+
+    return output.getvalue()

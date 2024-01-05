@@ -62,6 +62,16 @@ if st.button('Search'):
     search_query = ', '.join(champions)
     Database.save_data(search_query, all_champion_info)
 
+    csv_data = convert_df_to_csv(all_champion_info)
+
+    # Bouton de téléchargement
+    st.download_button(
+        label="Télécharger les données en CSV",
+        data=csv_data,
+        file_name='results.csv',
+        mime='text/csv',
+    )
+
 st.video(video_url)
 
 
